@@ -24,6 +24,11 @@ setup(name='YUIdemo',
                         'z3c.testsetup',
                         'grokcore.startup',
                         # Add extra requirements here
+                        'hurry.yui',
+                        'megrok.resource',
+                        'megrok.layout',
+                        'megrok.navigation',
+                        'megrok.pagetemplate',
                         ],
       entry_points = """
       [console_scripts]

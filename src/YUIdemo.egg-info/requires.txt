@@ -3,3 +3,8 @@ grok
 grokui.admin
 z3c.testsetup
 grokcore.startup
+hurry.yui
+megrok.resource
+megrok.layout
+megrok.navigation
+megrok.pagetemplate

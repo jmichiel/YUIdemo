@@ -1,0 +1,21 @@
+<html xmlns:tal="http://xml.zope.org/namespaces/tal">
+<head>
+   <title>YUI Demo</title>
+   <style>
+   html, #ft {background-color:#eee;}
+   body {margin:0;}
+   #doc {background-color:white;}
+   #bd  {border: solid 1px #ddd;}
+   </style>
+</head>
+<body>
+<div id="doc" class="yui-t7">
+   <div id="hd" role="navigation">Navigation will go here!</div>
+   <div id="bd" role="main">
+	<div class="yui-g" tal:content="structure view/content">
+	</div>
+   </div>
+   <div id="ft" role="contentinfo">The Grok YUI demo</div>
+</div>
+</body>
+</html>

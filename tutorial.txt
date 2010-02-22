@@ -1,0 +1,20 @@
+=================
+Using YUI on Grok
+=================
+
+In this tutorial you'll be learning how to use the Yahoo! User Interface Library, or YUI in short
+in you Grok project. YUI is a JavaScript and CSS library providing all sorts of handy components
+that you can use to make you site work an look better without too much effort, and in a 
+cross-browser compatible way. More details on the YUI website [#]_
+
+We will be using YUI 2.
+
+The main packages that we will use are 
+* hurry.yui which contains the YUI
+* megrok.resource
+but along the way, we'll also be using
+* megrok.layout for the main layout
+* megrok.navigation for the menus
+* megrok.pagetemplate to override default templates
+
+.. [#] The YUI website: http://developer.yahoo.com/yui/

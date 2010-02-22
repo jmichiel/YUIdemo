@@ -8,4 +8,5 @@ src/YUIdemo.egg-info/requires.txt
 src/YUIdemo.egg-info/top_level.txt
 src/yuidemo/__init__.py
 src/yuidemo/app.py
+src/yuidemo/layout.py
 src/yuidemo/tests.py
