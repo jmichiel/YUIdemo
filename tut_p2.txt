@@ -1,0 +1,98 @@
+=================
+Adding a YUI menu
+=================
+
+The next thing we're going to do is adding a YUI menu.
+We'll first define a menu using megrok.navigation, and then override the default template to make it
+YUI compatible.
+
+Defining the Menu
+-----------------
+
+Make a new source file 'menu.py', and add this code
+
+.. code-block:: python
+
+	import grok
+	from megrok import navigation
+	
+	class MainMenu(navigation.Menu):
+		grok.name('main-menu')
+	    
+	    
+Edit layout.pt, and replace 
+
+.. code-block:: xml
+	
+	<div id="hd" role="navigation">Navigation will go here!</div>
+
+ with
+
+.. code-block:: xml
+	
+	<div id="hd" role="navigation" tal:content="structure provider:main-menu"></div>
+	
+Edit app.py and change the Index view definition to
+
+.. code-block:: python
+
+	from megrok import navigation
+	from menu import MainMenu
+	
+	class Index(layout.Page):
+	    navigation.sitemenuitem(MainMenu, 'Home', order=-1)
+ 
+ We created a menu, called it 'main-menu', told the layout template to render is at the top of the page,
+ and added the main index view as the home link.
+ 
+ Restart your server and take a look. Not exactly state-of-the-art, is it?
+ The default templates of megrok.navigation just render an unordered list (<ul>), and there is no CSS or 
+ javascript in place to do anything fancy. A YUI menu requires a bit more than just an <ul>, so
+ we need to tell megrok.navigation to use a different template.
+ 
+ megrok.template makes this an easy job.
+ Go back to menu.py and change the menu definition, and add 2 pagetemplates 
+ 
+ .. code-block:: python
+ 
+	from megrok import pagetemplate
+	
+	class MainMenu(navigation.Menu):
+	    grok.name('main-menu')
+	    
+	    cssClass='yuimenubar yuimenubarnav'
+	    cssItemClass='yuimenubaritem'
+	    cssItemLabelClass='yuimenubaritemlabel'
+
+	class MenuTemplate(pagetemplate.PageTemplate):
+	    grok.template('menu')
+	    pagetemplate.view(navigation.interfaces.IMenu)
+
+Make a directory 'menu_templates' and add a file 'menu.pt' with this content:
+
+.. code-block:: xml
+
+	<div tal:attributes="id viewletmanager/id|default;class viewletmanager/cssClass" 
+		tal:define="viewlets viewletmanager/viewlets"
+		tal:condition="viewlets"> 
+		<div class="bd">
+			<ul class="first-of-type">
+				<tal:repeat tal:repeat='viewlet viewlets' tal:replace='structure viewlet/render'/>
+			</ul>
+		</div>
+	</div>
+
+add a file 'item.pt' with this content:
+
+.. code-block:: xml
+
+	<li  tal:attributes="class viewletmanager/cssItemClass"
+		tal:define="submenu viewlet/subMenu | nothing">
+	  <a href="#" 
+	     tal:attributes="href viewlet/link; class viewletmanager/cssItemLabelClass">
+	     <img tal:condition="viewlet/icon | nothing" tal:attributes="src viewlet/icon; title viewlet/title"/>
+	     <span tal:content="viewlet/title">Title</span></a>
+	  <tal:block condition="submenu" replace="structure provider:${submenu}">sub menu items</tal:block>
+	</li>
+
+	       

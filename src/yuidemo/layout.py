@@ -16,4 +16,3 @@ class Layout(layout.Layout):
     def update(self):
         yui.reset_fonts_grids.need()
         yui.base.need()
-        print self.request.__class__

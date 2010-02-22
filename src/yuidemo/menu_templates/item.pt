@@ -1,0 +1,8 @@
+<li  tal:attributes="class viewletmanager/cssItemClass"
+	tal:define="submenu viewlet/subMenu | nothing">
+  <a href="#" 
+     tal:attributes="href viewlet/link; class viewletmanager/cssItemLabelClass">
+     <img tal:condition="viewlet/icon | nothing" tal:attributes="src viewlet/icon; title viewlet/title"/>
+     <span tal:content="viewlet/title">Title</span></a>
+  <tal:block condition="submenu" replace="structure provider:${submenu}">sub menu items</tal:block>
+</li>

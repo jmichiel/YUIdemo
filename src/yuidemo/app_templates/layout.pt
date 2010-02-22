@@ -10,7 +10,7 @@
 </head>
 <body>
 <div id="doc" class="yui-t7">
-   <div id="hd" role="navigation">Navigation will go here!</div>
+   <div id="hd" role="navigation" tal:content="structure provider:main-menu"></div>
    <div id="bd" role="main">
 	<div class="yui-g" tal:content="structure view/content">
 	</div>
