@@ -1,0 +1,11 @@
+setup.py
+src/YUIdemo.egg-info/PKG-INFO
+src/YUIdemo.egg-info/SOURCES.txt
+src/YUIdemo.egg-info/dependency_links.txt
+src/YUIdemo.egg-info/entry_points.txt
+src/YUIdemo.egg-info/not-zip-safe
+src/YUIdemo.egg-info/requires.txt
+src/YUIdemo.egg-info/top_level.txt
+src/yuidemo/__init__.py
+src/yuidemo/app.py
+src/yuidemo/tests.py

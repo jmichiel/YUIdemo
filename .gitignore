@@ -1,0 +1,10 @@
+
+.project
+.pydevproject
+bin/
+parts/
+develop-eggs/
+var/
+*.pyc
+*.bak
+.installed.cfg

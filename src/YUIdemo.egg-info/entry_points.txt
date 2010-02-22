@@ -1,0 +1,8 @@
+
+      [console_scripts]
+      yuidemo-debug = grokcore.startup:interactive_debug_prompt
+      yuidemo-ctl = grokcore.startup:zdaemon_controller
+      [paste.app_factory]
+      main = grokcore.startup:application_factory
+      debug = grokcore.startup:debug_application_factory
+      
