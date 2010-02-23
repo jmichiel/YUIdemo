@@ -1,14 +1,10 @@
 <html xmlns:tal="http://xml.zope.org/namespaces/tal">
 <head>
    <title>YUI Demo</title>
-   <style>
-   html, #ft {background-color:#eee;}
-   body {margin:0;}
-   #doc {background-color:white;}
-   #bd  {border: solid 1px #ddd;}
-   </style>
+   <link rel="stylesheet" type="text/css" tal:attributes="href static/style.css" />
+   <tal:block tal:replace="structure provider:stylesheets"/>
 </head>
-<body>
+<body class="yui-skin-sam">
 <div id="doc" class="yui-t7">
    <div id="hd" role="navigation" tal:content="structure provider:main-menu"></div>
    <div id="bd" role="main">
@@ -17,5 +13,6 @@
    </div>
    <div id="ft" role="contentinfo">The Grok YUI demo</div>
 </div>
+<tal:block tal:replace="structure provider:scripts"/>
 </body>
 </html>

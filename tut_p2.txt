@@ -9,6 +9,8 @@ YUI compatible.
 Defining the Menu
 -----------------
 
+The menus created by megrok.navigation are viewletmanagers, and the items are viewlets, so if you define a menu,
+you are in fact defining a viewletmanager. 
 Make a new source file 'menu.py', and add this code
 
 .. code-block:: python
@@ -43,12 +45,16 @@ Edit app.py and change the Index view definition to
 	    navigation.sitemenuitem(MainMenu, 'Home', order=-1)
  
  We created a menu, called it 'main-menu', told the layout template to render is at the top of the page,
- and added the main index view as the home link.
+ and added the main index view as the home link, setting its order to -1 to have it rendered first
+ (the default order is 0).
  
  Restart your server and take a look. Not exactly state-of-the-art, is it?
  The default templates of megrok.navigation just render an unordered list (<ul>), and there is no CSS or 
  javascript in place to do anything fancy. A YUI menu requires a bit more than just an <ul>, so
  we need to tell megrok.navigation to use a different template.
+ 
+Overriding the templates
+------------------------
  
  megrok.template makes this an easy job.
  Go back to menu.py and change the menu definition, and add 2 pagetemplates 
@@ -60,6 +66,11 @@ Edit app.py and change the Index view definition to
 	class MainMenu(navigation.Menu):
 	    grok.name('main-menu')
 	    
+	    def update(self):
+	        super(MainMenu, self).update()
+	        yui.menu.need()
+	        
+	    id = 'main-menu'
 	    cssClass='yuimenubar yuimenubarnav'
 	    cssItemClass='yuimenubaritem'
 	    cssItemLabelClass='yuimenubaritemlabel'
@@ -68,6 +79,13 @@ Edit app.py and change the Index view definition to
 	    grok.template('menu')
 	    pagetemplate.view(navigation.interfaces.IMenu)
 
+	class ItemTemplate(pagetemplate.PageTemplate):
+	    grok.template('item')
+	    pagetemplate.view(navigation.interfaces.IMenuItem)
+
+The menu definition overrides the :func:`update` method to tell hurry.yui that it :func:`need()`s its menu
+resource library. Don't forget to call the super classes update when you do that here, as a menu is a 
+viewletmanager, and as such is required to call its viewlets' :func:`update` method.
 Make a directory 'menu_templates' and add a file 'menu.pt' with this content:
 
 .. code-block:: xml
@@ -95,4 +113,169 @@ add a file 'item.pt' with this content:
 	  <tal:block condition="submenu" replace="structure provider:${submenu}">sub menu items</tal:block>
 	</li>
 
-	       
+All we did now was making sure the menu is rendered in a YUI compatible manner, using DIVs and ULs, and setting 
+the right CSS classes. When overriding the megrok.navigation templates, you should bear 2 things in mind:
+
+* don't forget to render the viewlets (the :func:`structure viewlet/render` TALES expression).
+* if you have submenus, render them in the item after the title (using a :func:`structure provider:${viewlet/subMenu}`
+  statement or equivalent)
+
+Letting YUI loose
+-----------------
+  
+So far, so good, but the menu still looks the same. Let's get YUI to do it's magic with it!
+We need to add a piece of javascript to the page. It's common practice to do that at the back of the page.
+We could just add it the the layout, but there is a more elegant way: add a viewletmanager to the bottom 
+of the layout, and add scripts as viewlets, so the layout doesn't have to know what is needed.
+
+Add this line to 'layout.pt' just before the closing body tag:
+
+.. code-block:: xml
+
+	<tal:block tal:replace="structure provider:scripts"/>
+	
+Edit layout.py and add this:
+
+.. code-block::python
+
+	class Scripts(grok.ViewletManager):
+	    grok.context(Interface)
+
+Now, in menu.py add this:
+
+.. code-block::python
+
+	from layout import Scripts
+	from zope.interface import Interface
+
+	class MenuScript(grok.Viewlet):
+	    grok.viewletmanager(Scripts)
+	    grok.context(Interface)
+	    grok.template('script')
+
+And add a file 'script.pt' in the 'menu_templates' dir containing
+
+.. code-block:: xml
+
+	<script type="text/javascript">
+	    YAHOO.util.Event.onContentReady("main-menu", function () {
+	        var oMenuBar = new YAHOO.widget.MenuBar("main-menu", { 
+	                                                    autosubmenudisplay: true, 
+	                                                    hidedelay: 750, 
+	                                                    lazyload: true });
+	        oMenuBar.render();
+	    });
+	</script>
+
+Now there is still one important part missing: the default YUI skin called 'sam'.
+First of all you need to 'activate' it by adding a 'yui-skin-sam' class to the body tag:
+
+.. code-block:: xml
+
+	<body class="yui-skin-sam">
+
+But the skin CSS also needs to be loaded. A quick way is to load the entire sam skin by adding
+a :func:`yui.sam.need()` call in the layout's :func:`update`. But this loads the styles for all YUI components.
+So it's quite a hefty file, and we're only using the menu part. YUI also provides separate skin files for each 
+component. We're going with that way, but we're going to do it with a viewletmanager again. 
+
+Add this to the bottom of the layout's <head> tag:
+
+.. code-block:: xml
+
+	<tal:block tal:replace="structure provider:stylesheets"/>
+	
+And this class to 'layout.py':
+
+.. code-block:: python
+
+	class StyleSheets(grok.ViewletManager):
+	    grok.context(Interface)
+	    
+Now edit menu.py to add
+
+.. code-block:: python
+
+	from layout import StyleSheets
+	
+	class MenuStylesheet(grok.Viewlet):
+	    grok.viewletmanager(StyleSheets)
+	    grok.context(Interface)
+	    template = grok.PageTemplate('<link rel="stylesheet" type="text/css" tal:attributes="href context/++resource++yui/menu/assets/skins/sam/menu.css" />')
+
+We took a shortcut here not to have to create a separate .pt file for 1 line of code.
+
+Now restart the server and take a look.
+Looks a lot better, doesn't it?
+
+Some more fun!
+--------------
+
+Let's have some more fun. Let's pretend we are create (yet another) blogging app.
+Add a new menu in 'menu.py':
+
+.. code-block:: python
+
+	class BlogMenu(navigation.ContentMenu):
+	    grok.name('blog-menu')
+	    
+	    def update(self):
+	        super(BlogMenu, self).update()
+	        yui.menu.need()
+	        
+	    def getContent(self):
+	        return grok.getSite().values()
+	    def getTitle(self, entry):
+	        return entry.title
+	
+	    id = 'blog-menu'
+	    cssClass='yuimenu yuimenunav'
+	    cssItemClass='yuimenuitem'
+	    cssItemLabelClass='yuimenuitemlabel'
+
+and add this directive to the :func:`MainMenu` class definition
+
+.. code-block:: python
+
+    navigation.submenu('blog-menu', 'Blogs')
+
+Create 'blog.py' containing
+
+.. code-block:: python
+
+	import grok
+	from zope.interface import Interface
+	from zope import schema
+	from megrok import layout, navigation
+	from urllib import quote_plus
+	from menu import BlogMenu
+	
+	grok.templatedir('app_templates')
+	
+	class IBlogEntry(Interface):
+	    title = schema.TextLine(title=u'title')
+	    text = schema.Text(title=u'Body')
+	    
+	class BlogEntry(grok.Model):
+	    grok.implements(IBlogEntry)
+	    
+	class BlogIndex(layout.Page):
+	    grok.name('index')
+	    
+	class Add(layout.AddForm):
+	    navigation.sitemenuitem(BlogMenu, order=-1)
+	    grok.title('Add a Blog Entry')
+	    grok.context(grok.Application)
+	    form_fields = grok.Fields(IBlogEntry)
+	    
+	    @grok.action('Add entry')
+	    def Add(self, **data):
+	        entry = BlogEntry()
+	        self.applyData(entry, **data)
+	        grok.getSite()[quote_plus(entry.title)] = entry
+	        self.redirect(self.url(entry))
+
+Restart the server and have a look. Add a few blog entries to check it out.
+Well done, you implemented a YUI menu in Grok!
+Of course you can skin the menu all you like, but that's beyond the scope of this tutorial, just check the 
+YUI docs on how to do that.

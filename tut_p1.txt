@@ -31,8 +31,9 @@ and edit the setup.py. Add these lines at the bottom of to the :func:`install_re
             'megrok.navigation',
             'megrok.pagetemplate',
  
-If you would run buildout now, you would get a version conflict on zope.site and zope.location.
-Adding this to your buildout.cfg should solve this:
+If you are using Grok 1.0 and you would run buildout now, you would get a version conflict 
+on zope.site and zope.location, because megrok.resource was developed for Grok1.1 and up. 
+However, adding this to your buildout.cfg should solve this:
 
 :: 
 
@@ -62,12 +63,7 @@ Let's start by defining the actual template first. Make a file called 'layout.pt
 	<html xmlns:tal="http://xml.zope.org/namespaces/tal">
 	<head>
 	   <title>YUI Demo</title>
-	   <style>
-	   html, #ft {background-color:#eee;}
-	   body {margin:0;}
-	   #doc {background-color:white;}
-	   #bd  {border: solid 1px #ddd;}
-	   </style>
+	   <link rel="stylesheet" type="text/css" tal:attributes="href static/style.css" />
 	</head>
 	<body>
 	<div id="doc" class="yui-t7">
@@ -81,7 +77,16 @@ Let's start by defining the actual template first. Make a file called 'layout.pt
 	</body>
 	</html>
 
-So we make a basic layout with some inline (I know...) styling, and a basic `Grid <http://developer.yahoo.com/yui/grids/>`_
+Make a 'style.css' file in the 'static' dir:
+
+.. code-block:: css
+
+	html, #ft {background-color:#eee;}
+	body {margin:0;}
+	#doc {background-color:white;}
+	#bd  {border: solid 1px #ddd;}
+
+So we make a basic layout with a link to a stylesheet, and a basic `Grid <http://developer.yahoo.com/yui/grids/>`_
 The astute reader may have noticed that I DIDN'T refer to any YUI css of js file.
 This is where hurry.yui and megrok.resource come in!
 

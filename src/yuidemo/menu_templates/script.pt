@@ -1,0 +1,9 @@
+<script type="text/javascript">
+    YAHOO.util.Event.onContentReady("main-menu", function () {
+        var oMenuBar = new YAHOO.widget.MenuBar("main-menu", { 
+                                                    autosubmenudisplay: true, 
+                                                    hidedelay: 750, 
+                                                    lazyload: true });
+        oMenuBar.render();
+    });
+</script>

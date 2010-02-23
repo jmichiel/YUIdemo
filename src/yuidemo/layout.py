@@ -16,3 +16,10 @@ class Layout(layout.Layout):
     def update(self):
         yui.reset_fonts_grids.need()
         yui.base.need()
+
+
+class Scripts(grok.ViewletManager):
+    grok.context(Interface)
+    
+class StyleSheets(grok.ViewletManager):
+    grok.context(Interface)
