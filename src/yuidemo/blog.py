@@ -8,7 +8,7 @@ from zope.interface import Interface
 from zope import schema
 from megrok import layout, navigation
 from urllib import quote_plus
-from menu import BlogMenu
+from menu import BlogMenu, ActionMenu
 from megrok import resource
 from hurry import yui
 from layout import Scripts, StyleSheets
@@ -31,13 +31,12 @@ class BlogIndex(layout.Page):
     resource.include(yui.tabview)
     resource.include(yui.connection)
     
-class BlogView(grok.View):
+class BlogView(layout.Page):
+    navigation.menuitem(ActionMenu, 'View', order=-1)
     grok.name('view')
     
-        
-        
-    
-class MetaDataView(grok.View):
+class MetaDataView(layout.Page):
+    navigation.menuitem(ActionMenu, 'Meta Data', order=-1)
     grok.name('meta')
 
 class Add(layout.AddForm):
@@ -53,14 +52,15 @@ class Add(layout.AddForm):
         grok.getSite()[quote_plus(entry.title)] = entry
         self.redirect(self.url(entry))
 
-class Edit(grok.EditForm):
+class Edit(layout.EditForm):
+    navigation.menuitem(ActionMenu, 'Edit', order=-1)
     grok.context(IBlogEntry)
     form_fields = grok.Fields(IBlogEntry)
     
     @grok.action('Save Entry')
     def Save(self, **data):
         self.applyData(self.context, **data)
-        self.redirect(self.url(self.context))
+        self.redirect(self.url(self.context, 'view'))
         
 class BlogIndexScript(grok.Viewlet):
     grok.view(BlogIndex)

@@ -10,7 +10,7 @@ The EditForm
 
 We'll need to define an edit form, but we can't just use a megrok.layout.EditForm, because we don't want
 because we don't want the layout to appear again in our tab. We'll solve this here by using an ordinary 
-grok.EditForm to start *******, but below we'll see another trick using layers and skins. *********  
+grok.EditForm to start but below we'll see another trick using layers and skins.  
 
 .. code-block:: python
 
@@ -70,4 +70,87 @@ Try it out!
 Of course, this is a rather quick 'n dirty way to handle it, as there still are quite a lot of situations that
 aren't handled correctly, but it basically works, and that's what this tutorial is about.
 
+It has so many layers!
+----------------------
 
+We created an EditForm to be used inside the TabView. You can browse to it, but you won't have the layout, since
+it is not derived from megrok.layout.Page, but if we do that, it would render the entire layout inside the 
+TabView again. 
+
+However, we can solve this with layers and skins! Remember that rendering a view derived from megrok.layout.Page
+will look up a megrok.layout.Layout **for the current layer** and render itself in it. I specifically mentioned 
+this for this reason: we can override the layout in another skin to just render the page and no other html around
+it. 
+
+So let's define a layer and skin and a layout as part of this skin in layout.py
+
+.. code-block:: python
+
+	from zope.publisher.interfaces.browser import IDefaultBrowserLayer
+	
+	class IAJAXLayer(IDefaultBrowserLayer):
+	    grok.skin('ajax')
+	    
+	class AJAXLayout(layout.Layout):
+	    grok.layer(IAJAXLayer)
+	    grok.context(Interface)
+	    template=grok.PageTemplate('<tal:tag tal:replace="structure view/content"/>')
+	    
+We derive the layer from IDefaultBrowserLayer and not from IBrowserRequest, so that all views can still be looked
+up in both skins, since Grok registers all views to IDefaultBrowserLayer (which is derived from IBrowserRequest)
+by default.
+
+The template just renders the Page content and nothing else.
+
+Edit blog.py and make BlogIndex and BlogView derive from layout.Page and Edit from layout.EditForm.
+
+Restart the server, and try the edit form with and without the skin: if your url was 
+
+	http://localhost:8080/yuidemo/Well+hello+there/edit 
+	
+before, which should return the edit form in the layout without the TabView, change it to
+	
+	http://localhost:8080/++skin++ajax/yuidemo/Well+hello+there/edit
+	
+to activate the skin, and you'll get just the form markup as text.
+
+If you now go back to the index page. You'll see the problem I mentioned before: the urls for the Tabs still
+refer to the default skin views and rerender the layout inside the Tab.
+There's only one problem: there is no generic way (yet?) to generate a url to a different skin!
+How can we know it's an AJAX request then? Well, AJAX requests will have the 'X-Requested-With' HTTP header 
+set to 'XMLHttpRequest', and we can apply the skin based on that!
+
+Add this to layout.py:
+
+
+.. code-block:: python
+
+	from zope.app.publication.interfaces import IBeforeTraverseEvent
+	from zope.interface import alsoProvides
+
+	@grok.subscribe(grok.Application, IBeforeTraverseEvent)
+	def handle(obj, event):
+	    if event.request.getHeader('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+	        alsoProvides(event.request, IAJAXLayer)
+	        
+Now the index page will again look and behave as it did before, but the separate pages will also work.
+To make it more clear, you can now make the other views available in the menu:
+
+.. code-block:: python
+
+	class ActionMenu(navigation.Menu):
+	    grok.name('actions-menu')
+	    
+	    id = 'blog-menu'
+	    cssClass='yuimenu yuimenunav'
+	    cssItemClass='yuimenuitem'
+	    cssItemLabelClass='yuimenuitemlabel'
+
+add 
+
+.. code-block:: python
+
+    navigation.submenu('actions-menu', 'Actions', order=2)
+
+to the MainMenu definition, and add navigation.menuitem directives to the view, meta-data and edit views.
+ 

@@ -12,6 +12,7 @@ from hurry import yui
 class MainMenu(navigation.Menu):
     grok.name('main-menu')
     navigation.submenu('blog-menu', 'Blogs')
+    navigation.submenu('actions-menu', 'Actions')
     
     def update(self):
         super(MainMenu, self).update()
@@ -60,3 +61,14 @@ class BlogMenu(navigation.ContentMenu):
     cssClass='yuimenu yuimenunav'
     cssItemClass='yuimenuitem'
     cssItemLabelClass='yuimenuitemlabel'
+
+
+class ActionMenu(navigation.Menu):
+    grok.name('actions-menu')
+    
+    id = 'blog-menu'
+    cssClass='yuimenu yuimenunav'
+    cssItemClass='yuimenuitem'
+    cssItemLabelClass='yuimenuitemlabel'
+    
+    
