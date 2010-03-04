@@ -252,6 +252,7 @@ Create 'blog.py' containing
 	from megrok import layout, navigation
 	from urllib import quote_plus
 	from menu import BlogMenu
+	from cgi import escape
 	
 	class IBlogEntry(Interface):
 	    title = schema.TextLine(title=u'title')
@@ -260,6 +261,10 @@ Create 'blog.py' containing
 	class BlogEntry(grok.Model):
 	    grok.implements(IBlogEntry)
 	    
+	    @property
+	    def htmltext(self):
+	        return escape(self.text).replace('\n', '<br/>');
+
 	class BlogIndex(layout.Page):
 	    grok.name('index')
 	    
@@ -281,7 +286,7 @@ Create a dir called 'blog_templates and add blogindext.pt, containing
 .. code-block:: xml
 
 	<h1 tal:content="context/title"></h1>
-	<p tal:content="context/text"></p> 
+	<p tal:content="structure context/htmltext"></p> 
 
 Restart the server and have a look. Add a few blog entries to check it out.
 Well done, you implemented a YUI menu in Grok!

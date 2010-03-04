@@ -1,2 +1,2 @@
 <h1 tal:content="context/title"></h1>
-<p tal:content="context/text"></p>
+<p tal:content="structure context/htmltext"></p>

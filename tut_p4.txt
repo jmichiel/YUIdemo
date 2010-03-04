@@ -1,0 +1,73 @@
+================
+Return to sender
+================
+
+All we've done now is requesting data from the server. How about sending some to the server?
+We'll add an edit tab with a form that posts the data without reloading the entire page.
+
+The EditForm
+------------
+
+We'll need to define an edit form, but we can't just use a megrok.layout.EditForm, because we don't want
+because we don't want the layout to appear again in our tab. We'll solve this here by using an ordinary 
+grok.EditForm to start *******, but below we'll see another trick using layers and skins. *********  
+
+.. code-block:: python
+
+	class Edit(grok.EditForm):
+	    grok.context(IBlogEntry)
+	    form_fields = grok.Fields(IBlogEntry)
+	    
+	    @grok.action('Save Entry')
+	    def Save(self, **data):
+	        self.applyData(self.context, **data)
+	        self.redirect(self.url(self.context))
+        
+This will work as expected, but of course it will post the data and refresh the entire page.
+We'll need to hack the form's onsubmit handler to stop doing the default, and do our bidding.
+There's one catch: the form doesn't exist when the page is loaded: you're looking at the View tab,
+and the form is only loaded when the Edit tab is selected, so we can only rewire the submit code
+once the contents of the Edit tab changed.
+
+add this code to the <script> tag of the blog's script.pt:
+
+.. code-block:: javascript
+
+    myTabs.addTab(new YAHOO.widget.Tab(
+                   {label:'Edit',
+                    dataSrc: '<tal:tag tal:replace="python:view.url(context, 'edit')"/>'})
+                            );
+                            
+	var submitcallback = {
+	  success: function(o) {myTabs.selectTab(0);},
+	  failure: function(o) {editTab.content='Oops something went quite wrong...'}
+	};
+	
+	var editTab = myTabs.getTab(2);
+	editTab.addListener('contentChange',
+    	function(e)
+    	{ 
+			var formObject = document.forms[0];
+			YAHOO.util.Event.on(formObject,'submit', function (e) {
+				YAHOO.util.Event.stopEvent(e); 
+				YAHOO.util.Connect.setForm(formObject);
+				YAHOO.util.Connect.asyncRequest('POST', formObject.action, submitcallback);
+			});
+		}
+	);        
+	
+We first add the new tab. We then define a callback object containing functions in case of a success or failure.
+In case of success, we want to return to the view tab, otherwise we set the contents to an error message.
+
+	NOTE: we don't take a successful submit with invalid data into account here!
+	
+Then we attach a listener to the :func:`contentChange` event of our Edit tab, which rewires the submit handler
+not to do the default submit (:func:`YAHOO.util.Event.stopEvent(e)`), and then we load the form data from the form
+and send it with an asynchronous request.
+
+Try it out!
+
+Of course, this is a rather quick 'n dirty way to handle it, as there still are quite a lot of situations that
+aren't handled correctly, but it basically works, and that's what this tutorial is about.
+
+

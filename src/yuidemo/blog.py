@@ -12,14 +12,19 @@ from menu import BlogMenu
 from megrok import resource
 from hurry import yui
 from layout import Scripts, StyleSheets
-
+from cgi import escape
 
 class IBlogEntry(Interface):
     title = schema.TextLine(title=u'title')
     text = schema.Text(title=u'Body')
+
     
 class BlogEntry(grok.Model):
     grok.implements(IBlogEntry)
+
+    @property
+    def htmltext(self):
+        return escape(self.text).replace('\n', '<br/>');
     
 class BlogIndex(layout.Page):
     grok.name('index')
@@ -28,6 +33,9 @@ class BlogIndex(layout.Page):
     
 class BlogView(grok.View):
     grok.name('view')
+    
+        
+        
     
 class MetaDataView(grok.View):
     grok.name('meta')
@@ -44,6 +52,15 @@ class Add(layout.AddForm):
         self.applyData(entry, **data)
         grok.getSite()[quote_plus(entry.title)] = entry
         self.redirect(self.url(entry))
+
+class Edit(grok.EditForm):
+    grok.context(IBlogEntry)
+    form_fields = grok.Fields(IBlogEntry)
+    
+    @grok.action('Save Entry')
+    def Save(self, **data):
+        self.applyData(self.context, **data)
+        self.redirect(self.url(self.context))
         
 class BlogIndexScript(grok.Viewlet):
     grok.view(BlogIndex)

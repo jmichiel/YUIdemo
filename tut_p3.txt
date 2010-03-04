@@ -109,12 +109,12 @@ and the associated script.pt template:
 
 	<tal:tag tal:replace='structure string:<script type="text/javascript">' /> 
 	        var myTabs = new YAHOO.widget.TabView("blog-view");
-	        viewTab = myTabs.addTab(new YAHOO.widget.Tab(
+	        myTabs.addTab(new YAHOO.widget.Tab(
                         {label:'View',
                          dataSrc: '<tal:tag tal:replace="python:view.url(context, 'view')"/>',
                          active: true})
                             );
-	        metaTab = myTabs.addTab(new YAHOO.widget.Tab(
+	        myTabs.addTab(new YAHOO.widget.Tab(
                         {label:'Meta Data',
                          dataSrc: '<tal:tag tal:replace="python:view.url(context, 'meta')"/>'})
                             );
