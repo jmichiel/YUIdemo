@@ -2,9 +2,8 @@
 Adding a YUI menu
 =================
 
-The next thing we're going to do is adding a YUI menu.
 We'll first define a menu using megrok.navigation, and then override the default template to make it
-YUI compatible.
+YUI compatible. Then call some YUI js code to make it work.
 
 Defining the Menu
 -----------------
@@ -44,14 +43,14 @@ Edit app.py and change the Index view definition to
 	class Index(layout.Page):
 	    navigation.sitemenuitem(MainMenu, 'Home', order=-1)
  
- We created a menu, called it 'main-menu', told the layout template to render is at the top of the page,
- and added the main index view as the home link, setting its order to -1 to have it rendered first
- (the default order is 0).
+We created a menu, called it 'main-menu', told the layout template to render is at the top of the page,
+and added the main index view as the home link, setting its order to -1 to have it rendered first
+(the default order is 0).
  
- Restart your server and take a look. Not exactly state-of-the-art, is it?
- The default templates of megrok.navigation just render an unordered list (<ul>), and there is no CSS or 
- javascript in place to do anything fancy. A YUI menu requires a bit more than just an <ul>, so
- we need to tell megrok.navigation to use a different template.
+Restart your server and take a look. Not exactly state-of-the-art, is it?
+The default templates of megrok.navigation just render an unordered list (<ul>), and there is no CSS or 
+javascript in place to do anything fancy. A YUI menu requires a bit more than just an <ul>, so
+we need to tell megrok.navigation to use a different template.
  
 Overriding the templates
 ------------------------
@@ -95,7 +94,8 @@ Make a directory 'menu_templates' and add a file 'menu.pt' with this content:
 		tal:condition="viewlets"> 
 		<div class="bd">
 			<ul class="first-of-type">
-				<tal:repeat tal:repeat='viewlet viewlets' tal:replace='structure viewlet/render'/>
+				<tal:repeat tal:repeat='viewlet viewlets' 
+		                    tal:replace='structure viewlet/render'/>
 			</ul>
 		</div>
 	</div>
@@ -108,9 +108,11 @@ add a file 'item.pt' with this content:
 		tal:define="submenu viewlet/subMenu | nothing">
 	  <a href="#" 
 	     tal:attributes="href viewlet/link; class viewletmanager/cssItemLabelClass">
-	     <img tal:condition="viewlet/icon | nothing" tal:attributes="src viewlet/icon; title viewlet/title"/>
+	     <img tal:condition="viewlet/icon | nothing" tal:attributes="src viewlet/icon; 
+	     		                                                     title viewlet/title"/>
 	     <span tal:content="viewlet/title">Title</span></a>
-	  <tal:block condition="submenu" replace="structure provider:${submenu}">sub menu items</tal:block>
+	  <tal:block condition="submenu" 
+	             tal:replace="structure provider:${submenu}">sub menu items</tal:block>
 	</li>
 
 All we did now was making sure the menu is rendered in a YUI compatible manner, using DIVs and ULs, and setting 
@@ -201,7 +203,8 @@ Now edit menu.py to add
 	class MenuStylesheet(grok.Viewlet):
 	    grok.viewletmanager(StyleSheets)
 	    grok.context(Interface)
-	    template = grok.PageTemplate('<link rel="stylesheet" type="text/css" tal:attributes="href context/++resource++yui/menu/assets/skins/sam/menu.css" />')
+	    template = grok.PageTemplate('<link rel="stylesheet" type="text/css" '
+	   	           'tal:attributes="href context/++resource++yui/menu/assets/skins/sam/menu.css" />')
 
 We took a shortcut here not to have to create a separate .pt file for 1 line of code.
 
@@ -211,7 +214,7 @@ Looks a lot better, doesn't it?
 Some more fun!
 --------------
 
-Let's have some more fun. Let's pretend we are create (yet another) blogging app.
+Let's have some more fun. Let's pretend we are creating (yet another) blogging app.
 Add a new menu in 'menu.py':
 
 .. code-block:: python
@@ -250,8 +253,6 @@ Create 'blog.py' containing
 	from urllib import quote_plus
 	from menu import BlogMenu
 	
-	grok.templatedir('app_templates')
-	
 	class IBlogEntry(Interface):
 	    title = schema.TextLine(title=u'title')
 	    text = schema.Text(title=u'Body')
@@ -274,6 +275,13 @@ Create 'blog.py' containing
 	        self.applyData(entry, **data)
 	        grok.getSite()[quote_plus(entry.title)] = entry
 	        self.redirect(self.url(entry))
+
+Create a dir called 'blog_templates and add blogindext.pt, containing
+
+.. code-block:: xml
+
+	<h1 tal:content="context/title"></h1>
+	<p tal:content="context/text"></p> 
 
 Restart the server and have a look. Add a few blog entries to check it out.
 Well done, you implemented a YUI menu in Grok!

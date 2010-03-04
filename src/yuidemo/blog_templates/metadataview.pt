@@ -1,0 +1,10 @@
+<span tal:define="created context/zope:created;
+				  modified context/zope:modified;
+				  formatter python:request.locale.dates.getFormatter('dateTime')">
+	<dl>
+	<span tal:condition="created" >	<dt>Created</dt>
+	    <dd tal:content="python:formatter.format(created)"></dd></span>
+	<span tal:condition="modified" >	<dt>Modified</dt>
+	    <dd tal:content="python:formatter.format(modified)"></dd></span>
+	</dl>
+</span>

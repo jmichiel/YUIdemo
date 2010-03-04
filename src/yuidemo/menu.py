@@ -40,7 +40,8 @@ class MenuScript(grok.Viewlet):
 class MenuStylesheet(grok.Viewlet):
     grok.viewletmanager(StyleSheets)
     grok.context(Interface)
-    template = grok.PageTemplate('<link rel="stylesheet" type="text/css" tal:attributes="href context/++resource++yui/menu/assets/skins/sam/menu.css" />')
+    template = grok.PageTemplate('<link rel="stylesheet" type="text/css" '
+                                 'tal:attributes="href context/++resource++yui/menu/assets/skins/sam/menu.css" />')
 
 
 class BlogMenu(navigation.ContentMenu):

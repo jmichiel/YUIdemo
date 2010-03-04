@@ -9,8 +9,10 @@ from zope import schema
 from megrok import layout, navigation
 from urllib import quote_plus
 from menu import BlogMenu
+from megrok import resource
+from hurry import yui
+from layout import Scripts, StyleSheets
 
-grok.templatedir('app_templates')
 
 class IBlogEntry(Interface):
     title = schema.TextLine(title=u'title')
@@ -21,7 +23,15 @@ class BlogEntry(grok.Model):
     
 class BlogIndex(layout.Page):
     grok.name('index')
+    resource.include(yui.tabview)
+    resource.include(yui.connection)
     
+class BlogView(grok.View):
+    grok.name('view')
+    
+class MetaDataView(grok.View):
+    grok.name('meta')
+
 class Add(layout.AddForm):
     navigation.sitemenuitem(BlogMenu, order=-1)
     grok.title('Add a Blog Entry')
@@ -34,3 +44,16 @@ class Add(layout.AddForm):
         self.applyData(entry, **data)
         grok.getSite()[quote_plus(entry.title)] = entry
         self.redirect(self.url(entry))
+        
+class BlogIndexScript(grok.Viewlet):
+    grok.view(BlogIndex)
+    grok.viewletmanager(Scripts)
+    grok.context(Interface)
+    grok.template('script')
+    
+
+class BlogIndexStylesheet(grok.Viewlet):
+    grok.viewletmanager(StyleSheets)
+    grok.context(Interface)
+    template = grok.PageTemplate('<link rel="stylesheet" type="text/css" '
+                                 'tal:attributes="href context/++resource++yui/tabview/assets/skins/sam/tabview.css" />')
