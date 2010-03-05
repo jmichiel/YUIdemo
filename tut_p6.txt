@@ -9,3 +9,5 @@ that work on all browsers. It uses AJAX for some of its functionality, but it is
 There are other packages out there (JQuery is very popular one for instance) that perhaps are better suited 
 for pure AJAX applications, but if you understand how to use YUI, you won't have a hard time incorporating 
 other libraries into your projects.
+
+Source code for the final project can be downloaded from http://github.com/jmichiel/YUIdemo
