@@ -33,12 +33,14 @@ and edit the setup.py. Add these lines at the bottom of to the :func:`install_re
  
 If you are using Grok 1.0 and you would run buildout now, you would get a version conflict 
 on zope.site and zope.location, because megrok.resource was developed for Grok1.1 and up. 
-However, adding this to your buildout.cfg should solve this:
+Also, megrok.layout 1.0 or above only work for Grok1.1, so we need to use 0.9, too.
+Adding this to your buildout.cfg should solve this:
 
 :: 
 
 	[versions]
 	zope.site = 3.5.1
+	megrok.layout = 0.9
 	 
 
 Now run buildout again to download the needed packages.

@@ -1,0 +1,171 @@
+====================
+JSON meets the Panel  
+====================
+
+Finally, we'll see how to use JSON for data interchange in Grok.
+We'll also see how to use a YUI Panel in the process.
+
+Flash messages
+--------------
+
+To demonstrate JSON, we'll be using flash messages. Flash messages are short messages that you can 'send' to the
+user from somewhere inside your code, typically when new object were created or something similar
+and then  show them on your page when it is rendered. See the z3c.flashmessage package on PyPI for more info.
+
+Grok 1.0 uses z3c.flashmessage by default and registers a z3c.flashmessage.interfaces.IMessageSource utility
+A grok.View has a :func:`flash` method for this purpose, however, megrok.layout.Page is not derived from 
+grok.View, so it does not have the :func:`flash` (at least not in v0.9). 
+So we'll brew our own function for that.
+
+We'll be periodically checking the server for new messages, and display them in a Panel that will popup.
+
+We'll put all our message code in a message.py file:
+
+.. code-block:: python
+
+	import grok
+	from zope.interface import Interface
+	from hurry import yui
+	from layout import StyleSheets, Scripts
+	from zope import component
+	from z3c.flashmessage.interfaces import IMessageReceiver, IMessageSource
+	
+	
+	def flash( message, type='message'):
+	    source = component.getUtility(IMessageSource, name='session')
+	    source.send(message, type)
+	    
+This is the :func:`flash` function to be used whenever we see fit. It just gets the IMessageSource utility
+that is registered by Grok, and sends the message to it. You can specify a type to categorize your messages.
+	
+.. code-block:: python
+
+	class MessagesScript(grok.Viewlet):
+	    grok.viewletmanager(Scripts)
+	    grok.context(Interface)
+	    grok.template('script')
+	    
+	    def update(self):
+	        yui.json.need()
+	        yui.container.need()
+	        yui.dragdrop.need()
+	        
+	    @property
+	    def messageurl(self):
+	        return self.view.url(grok.getSite(), 'messages')
+	    
+	class PanelStylesheet(grok.Viewlet):
+	    grok.viewletmanager(StyleSheets)
+	    grok.context(Interface)
+	    template = grok.PageTemplate('<link rel="stylesheet" type="text/css" '
+	            'tal:attributes="href '
+	            'context/++resource++yui/container/assets/skins/sam/container.css" />')
+	
+Here we load the script and tell hurry.yui that is needs to load JSON, Container and DragDrop from the YUI 
+library. DragDrop is needed if we want our messagebox to be movable. There is also a messageurl property method
+that returns the url to our JSON view which we will define later.
+
+We also load the container CSS file provided with YUI.
+
+JSON
+----
+
+These are the contents of the script.pt file (in the message_templates dir):   
+
+.. code-block:: javascript
+
+	<div id="messages">
+		<div class="hd">Messages</div>
+		<div class="bd"></div>
+		<div class="ft"></div>
+	</div>
+	<tal:tag tal:replace="structure string:<script type='text/javascript'>" /> 
+	    messagePanel = new YAHOO.widget.Panel("messages",
+	    		{ constraintoviewport:true,
+	    		  visible: false,
+	    		  context: ['bd', 'bl', 'bl']
+	    		});
+	    messagePanel.render();
+	    function getMessages()
+	    {
+			var callback = {
+			  success: function(o) {
+			  		var messages = YAHOO.lang.JSON.parse(o.responseText);
+			  		for (i in messages)
+			  		{
+			  			dl = document.createElement('dl');
+			  			var msg = messages[i];
+			  			dl.innerHTML='<dt>'+ msg.type+'</dt><dd>'+msg.message+'</dd>';
+			  			o.argument.appendToBody(dl);
+			  			o.argument.show();
+			  		}
+			  	},
+			  timeout: 3000,
+			  argument: this
+			};
+			YAHOO.util.Connect.asyncRequest('GET', 
+					'<tal:tag tal:replace="viewlet/messageurl"/>', 
+					callback, 
+					null);
+	    }
+	    YAHOO.lang.later(5000, messagePanel, getMessages, null, true);
+	    messagePanel.hideEvent.subscribe(function(type, args, panel)
+			    {
+			    	panel.setBody('')
+			    },
+			    messagePanel);
+	<tal:tag tal:replace="structure string:</script>" /> 
+
+We first define the HTML code that defines a default YUI Module (of which a Panel is a specilization).
+We then create a Panel object that refers to that code, and we set some configuration options, amongst which
+that is should be hidden at the start.
+
+The we define the :func:`getMessages()` function that queries the server for new messages, and if there are,
+we parse them into a JavaScript object using the YAHOO.lang.JSON.parse function, cast them into HTML 
+and append them to the Panel body and then we show the Panel. 
+
+We then wire this function to be called every 5 seconds.
+
+Finally, we attach an event handler to the hideEvent of the Panel, that clears the Panel's body.
+
+Now we are still missing 1 bit: the JSON view:
+ 
+.. code-block:: python
+
+	class JSONMessages(grok.JSON):
+	    grok.context(grok.Application)
+	    
+	    def messages(self):
+	        receiver = component.getUtility(IMessageReceiver)
+	        return [{'message':m.message, 'type':m.type} for m in receiver.receive()]
+
+A grok.JSON view makes all its (public) methods traversable, and those methods should return something that
+can be turned into JSON data with the simplejson Python package. In our case it's an array of dictionaries
+containing the message data and the type of message.  
+
+Messaging
+---------
+
+Now we have everything in place to display messages, but we don't send any.
+Let's edit blog.py:
+
+.. code-block:: python
+
+	from message import flash
+	
+In the :func:`Add` method of the AddForm, add this before the redirect:
+
+.. code-block:: python
+
+	flash("New blog entry '%s' added!" % entry.title, type='blog')
+
+And in the :func:`Save` method of the EditForm, add this before the redirect:
+
+.. code-block:: python
+
+	flash("Blog entry '%s' updated!" % self.context.title, type='blog')
+	
+So, whenever we edit or add a blog, a message will be sent.
+
+Restart the server, refresh your page and have a blast!
+ 

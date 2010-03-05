@@ -1,0 +1,41 @@
+<div id="messages">
+	<div class="hd">Messages</div>
+	<div class="bd"></div>
+	<div class="ft"></div>
+</div>
+<tal:tag tal:replace="structure string:<script type='text/javascript'>" /> 
+    messagePanel = new YAHOO.widget.Panel("messages",
+    		{ constraintoviewport:true,
+    		  visible: false,
+    		  context: ['bd', 'bl', 'bl']
+    		});
+    messagePanel.render();
+    function getMessages()
+    {
+		var callback = {
+		  success: function(o) {
+		  		var messages = YAHOO.lang.JSON.parse(o.responseText);
+		  		for (i in messages)
+		  		{
+		  			dl = document.createElement('dl');
+		  			var msg = messages[i];
+		  			dl.innerHTML='<dt>'+ msg.type+'</dt><dd>'+msg.message+'</dd>';
+		  			o.argument.appendToBody(dl);
+		  			o.argument.show();
+		  		}
+		  	},
+		  timeout: 3000,
+		  argument: this
+		};
+		YAHOO.util.Connect.asyncRequest('GET', 
+				'<tal:tag tal:replace="viewlet/messageurl"/>', 
+				callback, 
+				null);
+    }
+    YAHOO.lang.later(5000, messagePanel, getMessages, null, true);
+    messagePanel.hideEvent.subscribe(function(type, args, panel)
+		    {
+		    	panel.setBody('')
+		    },
+		    messagePanel);
+<tal:tag tal:replace="structure string:</script>" /> 

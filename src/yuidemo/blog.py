@@ -13,6 +13,7 @@ from megrok import resource
 from hurry import yui
 from layout import Scripts, StyleSheets
 from cgi import escape
+from message import flash
 
 class IBlogEntry(Interface):
     title = schema.TextLine(title=u'title')
@@ -50,6 +51,7 @@ class Add(layout.AddForm):
         entry = BlogEntry()
         self.applyData(entry, **data)
         grok.getSite()[quote_plus(entry.title)] = entry
+        flash("New blog entry '%s' added!" % entry.title, type='blog')
         self.redirect(self.url(entry))
 
 class Edit(layout.EditForm):
@@ -60,6 +62,7 @@ class Edit(layout.EditForm):
     @grok.action('Save Entry')
     def Save(self, **data):
         self.applyData(self.context, **data)
+        flash("Blog entry '%s' updated!" % self.context.title, type='blog')
         self.redirect(self.url(self.context, 'view'))
         
 class BlogIndexScript(grok.Viewlet):

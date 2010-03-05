@@ -12,7 +12,7 @@ from hurry import yui
 class MainMenu(navigation.Menu):
     grok.name('main-menu')
     navigation.submenu('blog-menu', 'Blogs')
-    navigation.submenu('actions-menu', 'Actions')
+    navigation.submenu('actions-menu', 'Actions', order=2)
     
     def update(self):
         super(MainMenu, self).update()
