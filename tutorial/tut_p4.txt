@@ -9,7 +9,7 @@ The EditForm
 ------------
 
 We'll need to define an edit form, but we can't just use a megrok.layout.EditForm, because we don't want
-because we don't want the layout to appear again in our tab. We'll solve this here by using an ordinary 
+the layout to appear again in our tab. We'll solve this here by using an ordinary 
 grok.EditForm to start but below we'll see another trick using layers and skins.  
 
 .. code-block:: python

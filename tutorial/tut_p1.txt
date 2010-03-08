@@ -9,17 +9,19 @@ We will be using YUI 2. More details on the YUI website [#]_
 
 The main packages that we will use are 
 
-* hurry.yui which contains the YUI
-* megrok.resource
+* `hurry.yui <http://pypi.python.org/pypi/hurry.yui/>`_ which contains the YUI
+* `megrok.resource <http://pypi.python.org/pypi/megrok.resource/>`_
 
 but along the way, we'll also be using
 
-* megrok.layout for the main layout
-* megrok.navigation for the menus
-* megrok.pagetemplate to override default templates
+* `megrok.layout <http://pypi.python.org/pypi/megrok.layout/>`_ for the main layout
+* `megrok.navigation <http://pypi.python.org/pypi/megrok.navigation/>`_ for the menus
+* `megrok.pagetemplate <http://pypi.python.org/pypi/megrok.pagetemplate/>`_ to override default templates
 
+You should know something about layouts, and understanding layers is a plus for some part of the tutorial.
 
-Let's first set up a basic project to get going. Make a new grok project (see other docs on how to do that)
+Let's first set up a basic project to get going. Make a new grok project (see `other docs 
+<http://grok.zope.org/doc/current/tutorial.html#getting-started-with-grok>`_ on how to do that)
 and edit the setup.py. Add these lines at the bottom of to the :func:`install_requires` section 
 (under :func:`# Add extra requirements here`):
 
@@ -31,9 +33,8 @@ and edit the setup.py. Add these lines at the bottom of to the :func:`install_re
             'megrok.navigation',
             'megrok.pagetemplate',
  
-If you are using Grok 1.0 and you would run buildout now, you would get a version conflict 
-on zope.site and zope.location, because megrok.resource was developed for Grok1.1 and up. 
-Also, megrok.layout 1.0 or above only work for Grok1.1, so we need to use 0.9, too.
+If you are using Grok 1.0 and you would run buildout now, you would get version conflicts on some packages 
+because they were developed for Grok1.1 and up. 
 Adding this to your buildout.cfg should solve this:
 
 :: 
@@ -41,6 +42,7 @@ Adding this to your buildout.cfg should solve this:
 	[versions]
 	zope.site = 3.5.1
 	megrok.layout = 0.9
+	megrok.pagetemplate = 0.3
 	 
 
 Now run buildout again to download the needed packages.
@@ -54,7 +56,7 @@ or create a macro that you call from each view, so each view will need to know w
 With megrok.layout you just define a layout template and you indicate with a 'func:'`structure view/content` 
 TALES expression where the view template should be rendered. You then derive your views from megrok.layout.Page 
 instead of grok.View, and the framework automatically looks up the layout for the current layer and renders
-you view inside it.
+your view inside it.
 
 Enough talk, let's get cracking, Mr Bond!
 
@@ -69,12 +71,12 @@ Let's start by defining the actual template first. Make a file called 'layout.pt
 	</head>
 	<body>
 	<div id="doc" class="yui-t7">
-	   <div id="hd" role="navigation">Navigation will go here!</div>
-	   <div id="bd" role="main">
+	   <div id="header" role="navigation">Navigation will go here!</div>
+	   <div id="body" role="main">
 		<div class="yui-g" tal:content="structure view/content">
 		</div>
 	   </div>
-	   <div id="ft" role="contentinfo">The Grok YUI demo</div>
+	   <div id="footer" role="contentinfo">The Grok YUI demo</div>
 	</div>
 	</body>
 	</html>
@@ -83,13 +85,12 @@ Make a 'style.css' file in the 'static' dir:
 
 .. code-block:: css
 
-	html, #ft {background-color:#eee;}
+	html, #footer {background-color:#eee;}
 	body {margin:0;}
 	#doc {background-color:white;}
-	#bd  {border: solid 1px #ddd;}
 
 So we make a basic layout with a link to a stylesheet, and a basic `Grid <http://developer.yahoo.com/yui/grids/>`_
-The astute reader may have noticed that I DIDN'T refer to any YUI css of js file.
+The astute reader may have noticed that I DIDN'T refer to any YUI css orr js file.
 This is where hurry.yui and megrok.resource come in!
 
 Make a new file called 'layout.py' alongside the app.py file:
@@ -127,12 +128,15 @@ Base defines some basic styles.
 'OK, but defining your requirements, doesn't include them', I hear you think. It doesn't, indeed.
 
 Unless you use megrok.resource. This package uses hurry.zoperesource, which will override the default  
-Request object with a special one that will add needed resources to the <head> tag of your HTML just
+Request object with a special one that will add the needed resources to the <head> tag of your HTML just
 before rendering. Kind of magic...
+
 Before you can actually try it out, we should redefine the default index page. Edit app.py and
 change the index view to
 
 .. code-block:: python
+
+	from megrok import layout
 
 	class Index(layout.Page):
 	    pass # see app_templates/index.pt
@@ -145,7 +149,12 @@ and the index.pt template to
 	
 	<p>This project demonstrates how to use the YUI library inside a Grok Project.</p>
 
-Now fire up your server, add your app and browe to it.
+Now fire up your server, add your app and browse to it.
+
+It should look like this:
+
+.. image:: site_p1.jpg
+
 You see from the code that the view never refers to the layout, yet when rendered, it becomes part of your layout.
 
 Congratulations, You got YUI working under Grok! 

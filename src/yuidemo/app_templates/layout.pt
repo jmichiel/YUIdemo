@@ -6,12 +6,12 @@
 </head>
 <body class="yui-skin-sam">
 <div id="doc" class="yui-t7">
-   <div id="hd" role="navigation" tal:content="structure provider:main-menu"></div>
-   <div id="bd" role="main">
+   <div id="header" role="navigation" tal:content="structure provider:main-menu"></div>
+   <div id="body" role="main">
 	<div class="yui-g" tal:content="structure view/content">
 	</div>
    </div>
-   <div id="ft" role="contentinfo">The Grok YUI demo</div>
+   <div id="footer" role="contentinfo">The Grok YUI demo</div>
 </div>
 <tal:block tal:replace="structure provider:scripts"/>
 </body>

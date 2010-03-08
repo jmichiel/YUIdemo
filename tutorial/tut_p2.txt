@@ -25,13 +25,13 @@ Edit layout.pt, and replace
 
 .. code-block:: xml
 	
-	<div id="hd" role="navigation">Navigation will go here!</div>
+	<div id="header" role="navigation">Navigation will go here!</div>
 
- with
+with
 
 .. code-block:: xml
 	
-	<div id="hd" role="navigation" tal:content="structure provider:main-menu"></div>
+	<div id="header" role="navigation" tal:content="structure provider:main-menu"></div>
 	
 Edit app.py and change the Index view definition to
 
@@ -47,7 +47,11 @@ We created a menu, called it 'main-menu', told the layout template to render is 
 and added the main index view as the home link, setting its order to -1 to have it rendered first
 (the default order is 0).
  
-Restart your server and take a look. Not exactly state-of-the-art, is it?
+Restart your server and take a look. 
+
+.. image:: site_p2a.jpg
+
+Not exactly state-of-the-art, is it?
 The default templates of megrok.navigation just render an unordered list (<ul>), and there is no CSS or 
 javascript in place to do anything fancy. A YUI menu requires a bit more than just an <ul>, so
 we need to tell megrok.navigation to use a different template.
@@ -55,12 +59,13 @@ we need to tell megrok.navigation to use a different template.
 Overriding the templates
 ------------------------
  
- megrok.template makes this an easy job.
- Go back to menu.py and change the menu definition, and add 2 pagetemplates 
+megrok.template makes this an easy job.
+Go back to menu.py and change the menu definition, and add 2 pagetemplates 
  
  .. code-block:: python
  
 	from megrok import pagetemplate
+	from hurry import yui
 	
 	class MainMenu(navigation.Menu):
 	    grok.name('main-menu')
@@ -82,7 +87,7 @@ Overriding the templates
 	    grok.template('item')
 	    pagetemplate.view(navigation.interfaces.IMenuItem)
 
-The menu definition overrides the :func:`update` method to tell hurry.yui that it :func:`need()`s its menu
+The menu definition overrides the :func:`update` method to tell hurry.yui that it :func:`need()` s its menu
 resource library. Don't forget to call the super classes update when you do that here, as a menu is a 
 viewletmanager, and as such is required to call its viewlets' :func:`update` method.
 Make a directory 'menu_templates' and add a file 'menu.pt' with this content:
@@ -138,14 +143,14 @@ Add this line to 'layout.pt' just before the closing body tag:
 	
 Edit layout.py and add this:
 
-.. code-block::python
+.. code-block:: python
 
 	class Scripts(grok.ViewletManager):
 	    grok.context(Interface)
 
 Now, in menu.py add this:
 
-.. code-block::python
+.. code-block:: python
 
 	from layout import Scripts
 	from zope.interface import Interface
@@ -181,7 +186,7 @@ a :func:`yui.sam.need()` call in the layout's :func:`update`. But this loads the
 So it's quite a hefty file, and we're only using the menu part. YUI also provides separate skin files for each 
 component. We're going with that way, but we're going to do it with a viewletmanager again. 
 
-Add this to the bottom of the layout's <head> tag:
+Add this to the layout's <head> tag before our own stylesheet:
 
 .. code-block:: xml
 
@@ -209,6 +214,9 @@ Now edit menu.py to add
 We took a shortcut here not to have to create a separate .pt file for 1 line of code.
 
 Now restart the server and take a look.
+
+.. image:: site_p2b.jpg
+
 Looks a lot better, doesn't it?
 
 Some more fun!
@@ -289,6 +297,10 @@ Create a dir called 'blog_templates and add blogindext.pt, containing
 	<p tal:content="structure context/htmltext"></p> 
 
 Restart the server and have a look. Add a few blog entries to check it out.
+
+.. image:: site_p2c.jpg
+
 Well done, you implemented a YUI menu in Grok!
+
 Of course you can skin the menu all you like, but that's beyond the scope of this tutorial, just check the 
 YUI docs on how to do that.

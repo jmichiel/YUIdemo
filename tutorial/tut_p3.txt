@@ -100,8 +100,8 @@ We need some JavaScript to hook it up and load the appropriate CSS. Add a script
 	    grok.viewletmanager(StyleSheets)
 	    grok.context(Interface)
 	    template = grok.PageTemplate('<link rel="stylesheet" type="text/css" '
-	         'tal:attributes="href 
-	         	context/++resource++yui/tabview/assets/skins/sam/tabview.css" />')
+	         'tal:attributes="href '
+	         	'context/++resource++yui/tabview/assets/skins/sam/tabview.css" />')
 
 and the associated script.pt template:
 
@@ -152,7 +152,11 @@ We're using the Zope implementation of Dublin Core, which is a *de facto* indust
 in document-oriented systems. I won't go any further into that, as it has nothing to do with JavaScript or
 AJAX.
 
-Now restart the server and check it out. Each time you switch tabs, the content is loaded from the server.
+Now restart the server and check it out. 
+
+.. image:: site_p3.jpg
+
+Each time you switch tabs, the content is loaded from the server.
 You can also change the behaviour, so that the contents are only loaded once, by setting the 'cacheData' 
 configuration option of the tab to true. But we specifically don't want that behaviour, or the rest of 
 the tutorial won't work!  

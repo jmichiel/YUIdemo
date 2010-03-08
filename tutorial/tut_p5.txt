@@ -10,14 +10,15 @@ Flash messages
 
 To demonstrate JSON, we'll be using flash messages. Flash messages are short messages that you can 'send' to the
 user from somewhere inside your code, typically when new object were created or something similar
-and then  show them on your page when it is rendered. See the z3c.flashmessage package on PyPI for more info.
-
-Grok 1.0 uses z3c.flashmessage by default and registers a z3c.flashmessage.interfaces.IMessageSource utility
-A grok.View has a :func:`flash` method for this purpose, however, megrok.layout.Page is not derived from 
-grok.View, so it does not have the :func:`flash` (at least not in v0.9). 
-So we'll brew our own function for that.
+and then  show them on the next page when it is rendered. See the 
+`z3c.flashmessage <http://pypi.python.org/pypi/z3c.flashmessage/>`_ package on PyPI for more info.
 
 We'll be periodically checking the server for new messages, and display them in a Panel that will popup.
+
+Grok 1.0 uses z3c.flashmessage by default and registers a z3c.flashmessage.interfaces.IMessageSource utility
+A grok.View has a :func:`flash` method for this purpose, however, in megrok.layout v0.9, megrok.layout.Page
+is not derived from grok.View, so it does not have the :func:`flash`. So you'll need to brew our own function 
+for that.
 
 We'll put all our message code in a message.py file:
 
@@ -27,10 +28,15 @@ We'll put all our message code in a message.py file:
 	from zope.interface import Interface
 	from hurry import yui
 	from layout import StyleSheets, Scripts
+	
+	
+if you're using grok v1.0, also define this:
+
+.. code-block:: python
+
 	from zope import component
 	from z3c.flashmessage.interfaces import IMessageReceiver, IMessageSource
-	
-	
+
 	def flash( message, type='message'):
 	    source = component.getUtility(IMessageSource, name='session')
 	    source.send(message, type)
@@ -83,7 +89,7 @@ These are the contents of the script.pt file (in the message_templates dir):
 	    messagePanel = new YAHOO.widget.Panel("messages",
 	    		{ constraintoviewport:true,
 	    		  visible: false,
-	    		  context: ['bd', 'bl', 'bl']
+	    		  context: ['body', 'bl', 'bl']
 	    		});
 	    messagePanel.render();
 	    function getMessages()
@@ -149,6 +155,8 @@ Messaging
 Now we have everything in place to display messages, but we don't send any.
 Let's edit blog.py:
 
+for grok 1.0, add this
+
 .. code-block:: python
 
 	from message import flash
@@ -157,15 +165,19 @@ In the :func:`Add` method of the AddForm, add this before the redirect:
 
 .. code-block:: python
 
-	flash("New blog entry '%s' added!" % entry.title, type='blog')
+	self.flash("New blog entry '%s' added!" % entry.title, type='blog')
 
 And in the :func:`Save` method of the EditForm, add this before the redirect:
 
 .. code-block:: python
 
-	flash("Blog entry '%s' updated!" % self.context.title, type='blog')
+	self.flash("Blog entry '%s' updated!" % self.context.title, type='blog')
 	
+	
+for Grok 1.0, omit the 'self.'.
 So, whenever we edit or add a blog, a message will be sent.
 
 Restart the server, refresh your page and have a blast!
+
+.. image:: site_p5.jpg
  
