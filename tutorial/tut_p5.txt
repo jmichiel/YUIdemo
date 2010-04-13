@@ -9,18 +9,18 @@ Flash messages
 --------------
 
 To demonstrate JSON, we'll be using flash messages. Flash messages are short messages that you can 'send' to the
-user from somewhere inside your code, typically when new object were created or something similar
-and then  show them on the next page when it is rendered. See the 
+user from somewhere inside your code -- typically when a new object was created or something similar --
+and then show them on the page rendered next. See the 
 `z3c.flashmessage <http://pypi.python.org/pypi/z3c.flashmessage/>`_ package on PyPI for more info.
 
 We'll be periodically checking the server for new messages, and display them in a Panel that will popup.
 
 Grok 1.0 uses z3c.flashmessage by default and registers a z3c.flashmessage.interfaces.IMessageSource utility
 A grok.View has a :func:`flash` method for this purpose, however, in megrok.layout v0.9, megrok.layout.Page
-is not derived from grok.View, so it does not have the :func:`flash`. So you'll need to brew our own function 
+is not derived from grok.View, so it does not have the :func:`flash`. So we will need to brew our own function 
 for that.
 
-We'll put all our message code in a message.py file:
+We'll put all our message code in a 'message.py' file:
 
 .. code-block:: python
 
@@ -30,7 +30,7 @@ We'll put all our message code in a message.py file:
 	from layout import StyleSheets, Scripts
 	
 	
-if you're using grok v1.0, also define this:
+if you're using Grok v1.0, also define this:
 
 .. code-block:: python
 
@@ -67,24 +67,27 @@ that is registered by Grok, and sends the message to it. You can specify a type 
 	            'tal:attributes="href '
 	            'context/++resource++yui/container/assets/skins/sam/container.css" />')
 	
-Here we load the script and tell hurry.yui that is needs to load JSON, Container and DragDrop from the YUI 
+Here we loaded the script and tell hurry.yui that it needs to load JSON, Container and DragDrop from the YUI 
 library. DragDrop is needed if we want our messagebox to be movable. There is also a messageurl property method
 that returns the url to our JSON view which we will define later.
 
-We also load the container CSS file provided with YUI.
+We also loaded the container CSS file provided with YUI.
 
 JSON
 ----
 
-These are the contents of the script.pt file (in the message_templates dir):   
+These are the contents of the 'script.pt' file (in the 'message_templates' dir):   
 
-.. code-block:: javascript
+.. code-block:: html
 
 	<div id="messages">
 		<div class="hd">Messages</div>
 		<div class="bd"></div>
 		<div class="ft"></div>
 	</div>
+
+.. code-block:: javascript
+
 	<tal:tag tal:replace="structure string:<script type='text/javascript'>" /> 
 	    messagePanel = new YAHOO.widget.Panel("messages",
 	    		{ constraintoviewport:true,
@@ -122,19 +125,19 @@ These are the contents of the script.pt file (in the message_templates dir):
 			    messagePanel);
 	<tal:tag tal:replace="structure string:</script>" /> 
 
-We first define the HTML code that defines a default YUI Module (of which a Panel is a specilization).
-We then create a Panel object that refers to that code, and we set some configuration options, amongst which
-that is should be hidden at the start.
+We first defined the HTML code that defines a default YUI Module (of which a Panel is a specilization).
+We then created a Panel object that refers to that code, and we set some configuration options, amongst which
+that it should be hidden at the start.
 
-The we define the :func:`getMessages()` function that queries the server for new messages, and if there are,
+Then we defined the :func:`getMessages()` function that queries the server for new messages, and if there are,
 we parse them into a JavaScript object using the YAHOO.lang.JSON.parse function, cast them into HTML 
 and append them to the Panel body and then we show the Panel. 
 
-We then wire this function to be called every 5 seconds.
+We then wired this function to be called every 5 seconds.
 
-Finally, we attach an event handler to the hideEvent of the Panel, that clears the Panel's body.
+Finally, we attached an event handler to the hideEvent of the Panel, that clears the Panel's body.
 
-Now we are still missing 1 bit: the JSON view:
+Now we are still missing one bit: the JSON view:
  
 .. code-block:: python
 
@@ -146,14 +149,14 @@ Now we are still missing 1 bit: the JSON view:
 	        return [{'message':m.message, 'type':m.type} for m in receiver.receive()]
 
 A grok.JSON view makes all its (public) methods traversable, and those methods should return something that
-can be turned into JSON data with the simplejson Python package. In our case it's an array of dictionaries
+can be turned into JSON data with the simplejson Python package. In our case, it's an array of dictionaries
 containing the message data and the type of message.  
 
 Messaging
 ---------
 
 Now we have everything in place to display messages, but we don't send any.
-Let's edit blog.py:
+Let's edit 'blog.py':
 
 for grok 1.0, add this
 

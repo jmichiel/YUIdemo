@@ -8,27 +8,27 @@ a bit more dynamic, but that's about it.
 What is AJAX?
 -------------
 
-AJAX stands for 'Asynchronous JavaScript And XML'. A non-AJAX page works synchronously, in the sense that you
+AJAX stands for *Asynchronous JavaScript And XML*. A non-AJAX page works synchronously, in the sense that you
 request a page, read it, click a link or submit a form, and the entire page is refreshed. Repeat *ad infinitum*.
 However, in most cases a large part of the new page is exactly the same as the previous page: 
 headers, footers, menus and perhaps more.
 So the server is actually doing a lot of work for something that only changed partly. And a lot of network 
-bandwidth is wasted too. If only you would just update the needed parts...
+bandwidth is wasted too. If only you could just update the needed parts...
 
-This is exactly what AJAX was invented for, and why it is said to be 'asynchronous': you do something on the page
+This is exactly what AJAX was invented for, and why it is said to be *asynchronous*: you do something on the page
 which triggers a request to the server that only returns some data or a part of the page, which is then
 dynamically inserted in the page. Multiple requests would be pending, and the responses need not arrive in the 
 order of the requests. The request and the update are usually done using JavaScript, although 
-technically other scripting languages could be used, too. 
+technically other scripting languages could be used, too (including Python!). 
 
 That explains the A and the J, but what about XML? In the initial definition it was specified that XML was
-to be used for data interchange between client and server, and for that purpose the XMLHttpRequest object was
+to be used for data interchange between client and server, and for that purpose the *XMLHttpRequest* object was
 introduced. Since then however, it has become clear that XML is not a requirement: you could as well send plain
 text, pre-formatted HTML or format your data as JSON (JavaScript Object Notation, see below); 
-it all depends on how you handle the data. So the X stands for 'whatever' rather than 'XML', nowadays.
+it all depends on how you handle the data. So the X stands for *whatever* rather than *XML*, nowadays.
 
 A quick note on JSON: JSON is a very lightweight way of defining an object in plain text. 
-Is is much easier to decode or produce JSON data than XML data: e.g. calling 'eval('<json-text>')' in JavaScript 
+It is much easier to decode or produce JSON data than XML data: e.g. calling :func:`eval('<json-text>')` in JavaScript 
 will result in a JavaScript object. JSON also very closely matches a text-representation of a Python dictionary
 (if there really IS a difference?).
 
@@ -44,12 +44,12 @@ A TabView can be used to display contents that are in the HTML to start with, or
 contents from an 'external source': a separate view on our server. However, in that case it also needs the
 YUI Connection Manager to be loaded, so we shouldn't forget that!
 
-We'll go for the pre-formatted HTML approach, so the current blogindex.pt has to be displayed inside the View tab, 
-but using the BlogIndex will cause the layout to be loaded too so we'll have to make a separate view that doesn't 
-show layout and change the original blogindex.pt to display the TabView.
+We'll go for the pre-formatted HTML approach, so the current 'blogindex.pt' has to be displayed inside the View tab, 
+but using the BlogIndex will cause the layout to be loaded too, so we'll have to make a separate view that doesn't 
+show layout and change the original 'blogindex.pt' to display the TabView.
 
-Copy blogindex.pt to blogview.pt.
-Make a grok View called BlogView in blog.py, and specify that BlogIndex now needs yui.tabview and yui.connection
+Copy 'blogindex.pt' to 'blogview.pt'.
+Create a grok View called BlogView in 'blog.py', and specify that BlogIndex now needs yui.tabview and yui.connection
 like this:
 
 .. code-block:: python
@@ -67,13 +67,13 @@ like this:
     
 Note that we derive from grok.View, and not layout.Page!
 
-We also used another way of specifying needed resources. Instead of using the need() function, you can also
-use megrok.resource's include directive. There's a catch, however: this directive only works with objects you
+We also used another way of specifying needed resources. Instead of using the :func:`need()` function, you can also
+use megrok.resource's :func:`include` directive. There's a catch, however: this directive only works with objects you
 actually traverse to: in this case we traverse over our app object to a BlogEntry object and finally to the 
 BlogIndex view. In case of our Layout object, this won't work, because you never traverse to your layout, it is
 merely looked up in code when needed by a Page to which you did traverse. So be careful with this! 
 
-Now edit blogindex.pt
+Now edit 'blogindex.pt'
 
 .. code-block:: xml
 
@@ -84,7 +84,7 @@ Now edit blogindex.pt
 	    </div>
 	</div>
 	
-We need some JavaScript to hook it up and load the appropriate CSS. Add a script and stylesheet viewlet:
+We need some JavaScript to hook it up and load the appropriate CSS. Add a script and stylesheet viewlet to the file 'blog.py':
 
 .. code-block:: python
 
@@ -103,7 +103,7 @@ We need some JavaScript to hook it up and load the appropriate CSS. Add a script
 	         'tal:attributes="href '
 	         	'context/++resource++yui/tabview/assets/skins/sam/tabview.css" />')
 
-and the associated script.pt template:
+and the associated 'script.pt' template in the 'blog-templates' directory:
 
 .. code-block:: xml
 
@@ -121,19 +121,21 @@ and the associated script.pt template:
 	
 	<tal:tag tal:replace="structure string:</script>" /> 
 
-You might be wondering why we didn't just use normal <script> tags.
+You might be wondering why we didn't just use normal <script> elements.
 This is because we need some dynamic parts in the script: the urls to the views. ZPT will not parse anything 
-that is placed between <script> (and <style>) tags because that typically is application code that shouldn't be 
+that is placed in <script> (and <style>) elements because typically that is application code that should not be 
 parsed. Maybe that wasn't such a good idea after all, but this is how ZPT works, so we have to deal with it.
-Another workaround would be to add a funtion to the viewlet that returns the JavaScript as a sting and use the
-tal:content expression on the script tag. Or overwrite the render method and do it all by yourself.
+Another workaround would be to add a funtion to the viewlet that returns the JavaScript as a string and use the
+:func:`tal:content` expression on the script tag. Or overwrite the :func:`render` method and do it all by yourself.
 
-The only thing left now is the meta-data view.
+The only thing left now is the meta-data view in 'blog.py'.
 
 .. code-block:: python
 
 	class MetaDataView(grok.View):
 	    grok.name('meta')
+
+and 'metadataview.pt' in 'blog-templates'
 	    
 .. code-block:: xml
 
@@ -152,11 +154,14 @@ We're using the Zope implementation of Dublin Core, which is a *de facto* indust
 in document-oriented systems. I won't go any further into that, as it has nothing to do with JavaScript or
 AJAX.
 
+The Result
+==========
+
 Now restart the server and check it out. 
 
 .. image:: site_p3.jpg
 
 Each time you switch tabs, the content is loaded from the server.
-You can also change the behaviour, so that the contents are only loaded once, by setting the 'cacheData' 
+You can also change the behaviour, such that the contents are only loaded once, by setting the 'cacheData' 
 configuration option of the tab to true. But we specifically don't want that behaviour, or the rest of 
 the tutorial won't work!  

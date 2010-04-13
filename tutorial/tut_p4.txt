@@ -8,9 +8,9 @@ We'll add an edit tab with a form that posts the data without reloading the enti
 The EditForm
 ------------
 
-We'll need to define an edit form, but we can't just use a megrok.layout.EditForm, because we don't want
+In 'blog.py' we'll need to define an edit form, but we can't just use a megrok.layout.EditForm, because we don't want
 the layout to appear again in our tab. We'll solve this here by using an ordinary 
-grok.EditForm to start but below we'll see another trick using layers and skins.  
+grok.EditForm to start with; further below we'll see another trick, using layers and skins.  
 
 .. code-block:: python
 
@@ -29,11 +29,11 @@ There's one catch: the form doesn't exist when the page is loaded: you're lookin
 and the form is only loaded when the Edit tab is selected, so we can only rewire the submit code
 once the contents of the Edit tab changed.
 
-add this code to the <script> tag of the blog's script.pt:
+add this code within the <script> element of the blog's 'script.pt' (below the :func:`myTabs.addTab()` function that adds the 'Meta Data' tab):
 
 .. code-block:: javascript
 
-    myTabs.addTab(new YAHOO.widget.Tab(
+        myTabs.addTab(new YAHOO.widget.Tab(
                    {label:'Edit',
                     dataSrc: '<tal:tag tal:replace="python:view.url(context, 'edit')"/>'})
                             );
@@ -56,13 +56,13 @@ add this code to the <script> tag of the blog's script.pt:
 		}
 	);        
 	
-We first add the new tab. We then define a callback object containing functions in case of a success or failure.
+We first added the new tab. We then defined a callback object containing functions in case of a success or failure.
 In case of success, we want to return to the view tab, otherwise we set the contents to an error message.
 
 	NOTE: we don't take a successful submit with invalid data into account here!
 	
-Then we attach a listener to the :func:`contentChange` event of our Edit tab, which rewires the submit handler
-not to do the default submit (:func:`YAHOO.util.Event.stopEvent(e)`), and then we load the form data from the form
+Then we attached a listener to the :func:`contentChange` event of our Edit tab, which rewires the submit handler
+not to do the default submit (:func:`YAHOO.util.Event.stopEvent(e)`), but to load the form data from the form
 and send it with an asynchronous request.
 
 Try it out!
@@ -82,7 +82,7 @@ will look up a megrok.layout.Layout **for the current layer** and render itself 
 this for this reason: we can override the layout in another skin to just render the page and no other html around
 it. 
 
-So let's define a layer and skin and a layout as part of this skin in layout.py
+So let's define a layer and skin and a layout as part of this skin in 'layout.py':
 
 .. code-block:: python
 
@@ -102,7 +102,7 @@ by default.
 
 The template just renders the Page content and nothing else.
 
-Edit blog.py and make BlogIndex and BlogView derive from layout.Page and Edit from layout.EditForm.
+Edit 'blog.py' and make BlogView and MetaDataView derive from layout.Page and Edit from layout.EditForm.
 
 Restart the server, and try the edit form with and without the skin: if your url was 
 
@@ -120,8 +120,7 @@ There's only one problem: there is no generic way (yet?) to generate a url to a 
 How can we know it's an AJAX request then? Well, AJAX requests will have the 'X-Requested-With' HTTP header 
 set to 'XMLHttpRequest', and we can apply the skin based on that!
 
-Add this to layout.py:
-
+Add this to 'layout.py':
 
 .. code-block:: python
 
@@ -133,24 +132,37 @@ Add this to layout.py:
 	    if event.request.getHeader('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
 	        alsoProvides(event.request, IAJAXLayer)
 	        
-Now the index page will again look and behave as it did before, but the separate pages will also work.
-To make it more clear, you can now make the other views available in the menu:
+Now the index page will look and behave again as it did before, but the separate pages will also work.
+To make it more clear, you can now make the other views available in the menubar in 'menu.py':
 
 .. code-block:: python
 
 	class ActionMenu(navigation.Menu):
 	    grok.name('actions-menu')
 	    
-	    id = 'blog-menu'
+	    id = 'action-menu'
 	    cssClass='yuimenu yuimenunav'
 	    cssItemClass='yuimenuitem'
 	    cssItemLabelClass='yuimenuitemlabel'
 
-add 
+and also add 
 
 .. code-block:: python
 
     navigation.submenu('actions-menu', 'Actions', order=2)
 
-to the MainMenu definition, and add navigation.menuitem directives to the view, meta-data and edit views.
- 
+to the MainMenu definition.
+
+Finally, add navigation.menuitem directives to the view, meta-data and edit views in 'blog.py' like:
+
+.. code-block:: python
+
+    navigation.menuitem(ActionMenu, 'View', order=-1)
+
+Don't forget to add
+
+.. code-block:: python
+
+    from menu import ActionMenu
+
+Well, restart the server, and tell us: what do you think about that!?
