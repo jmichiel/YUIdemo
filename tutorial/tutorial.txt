@@ -7,3 +7,5 @@ in your Grok project. YUI is a JavaScript and CSS library providing all sorts of
 that you can use to make you site work an look better without too much effort, and in a 
 cross-browser compatible way. 
 
+In the process, you'll also be learning some basic uses of megrok.layout, megrok.navigation and JSON.
+

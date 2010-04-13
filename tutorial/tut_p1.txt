@@ -91,7 +91,8 @@ Create a 'style.css' file in the 'static' dir:
 	body {margin:0;}
 	#doc {background-color:white;}
 
-We created a basic layout with a link to a stylesheet, and a basic `Grid <http://developer.yahoo.com/yui/grids/>`_.
+We created a basic layout with a link to a stylesheet, and a basic `Grid <http://developer.yahoo.com/yui/grids/>`_ 
+by defining the main div-element to be of class :func:`yui-t7`.
 The astute reader may have noticed that I *did not* refer to any YUI CSS or javascript file.
 This is where hurry.yui and megrok.resource come in!
 
